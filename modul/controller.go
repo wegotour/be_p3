@@ -2,7 +2,6 @@ package modul
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,34 +43,34 @@ func GetAllDocs(db *mongo.Database, col string, docs interface{}) interface{} {
 	return docs
 }
 
-func updateOneDoc(db *mongo.Database, id primitive.ObjectID, col string, docs interface{}) (err error) {
-	cols := db.Collection(col)
-	filter := bson.M{}
-	update := bson.M{"$set": docs}
-	result, err := cols.UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		fmt.Printf("updateOneDoc: %v\n", err)
-	}
-	if result.ModifiedCount == 0 {
-		err = errors.New("no data has been changed with the specified id")
-		return
-	}
-	return
-}
+// func updateOneDoc(db *mongo.Database, id primitive.ObjectID, col string, docs interface{}) (err error) {
+// 	cols := db.Collection(col)
+// 	filter := bson.M{}
+// 	update := bson.M{"$set": docs}
+// 	result, err := cols.UpdateOne(context.Background(), filter, update)
+// 	if err != nil {
+// 		fmt.Printf("updateOneDoc: %v\n", err)
+// 	}
+// 	if result.ModifiedCount == 0 {
+// 		err = errors.New("no data has been changed with the specified id")
+// 		return
+// 	}
+// 	return
+// }
 
-func deleteOneDoc(db *mongo.Database, id primitive.ObjectID, col string) (err error) {
-	cols := db.Collection(col)
-	filter := bson.M{}
-	result, err := cols.DeleteOne(context.Background(), filter)
-	if err != nil {
-		fmt.Printf("deleteOneDoc: %v %v\n", id, err)
-	}
-	if result.DeletedCount == 0 {
-		err = fmt.Errorf("no data has been deleted with the specified id")
-		return
-	}
-	return
-}
+// func deleteOneDoc(db *mongo.Database, id primitive.ObjectID, col string) (err error) {
+// 	cols := db.Collection(col)
+// 	filter := bson.M{}
+// 	result, err := cols.DeleteOne(context.Background(), filter)
+// 	if err != nil {
+// 		fmt.Printf("deleteOneDoc: %v %v\n", id, err)
+// 	}
+// 	if result.DeletedCount == 0 {
+// 		err = fmt.Errorf("no data has been deleted with the specified id")
+// 		return
+// 	}
+// 	return
+// }
 
 // user
 func InsertUser(db *mongo.Database, col string, userdata model.User) (insertedID primitive.ObjectID, err error) {

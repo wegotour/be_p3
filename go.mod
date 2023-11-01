@@ -4,7 +4,6 @@ go 1.21.3
 
 require (
 	github.com/aiteung/atdb v0.1.1
-	github.com/wegotour/backend_swagger_p3 v1.0.0
 	github.com/whatsauth/watoken v0.1.2
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.9.0
