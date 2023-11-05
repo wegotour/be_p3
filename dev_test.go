@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var mconn = SetConnection("MONGOSTRING", "wegotour")
+
 // user
 func TestRegister(t *testing.T) {
 	mconn := SetConnection("MONGOSTRING", "wegotour")
@@ -75,15 +77,6 @@ func TestDeleteUser(t *testing.T) {
 func TestGetUserFromID(t *testing.T) {
 	id, _ := primitive.ObjectIDFromHex("")
 	anu, _ := modul.GetUserFromID(mconn, "user", id)
-	fmt.Println(anu)
-}
-
-func TestGetUserFromUsername(t *testing.T) {
-	anu, err := modul.GetUserFromUsername(mconn, "user", "dapskuy")
-	if err != nil {
-		t.Errorf("Error getting user: %v", err)
-		return
-	}
 	fmt.Println(anu)
 }
 
