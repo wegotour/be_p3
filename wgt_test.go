@@ -10,7 +10,7 @@ import (
 )
 
 func TestGeneratePasswordHash(t *testing.T) {
-	password := "secret"
+	password := "kepoih"
 	hash, _ := HashPassword(password) // ignore error for the sake of simplicity
 
 	fmt.Println("Password:", password)
