@@ -3,7 +3,7 @@ module github.com/wegotour/be_p3
 go 1.21.3
 
 require (
-	github.com/aiteung/atdb v0.1.1
+	github.com/aiteung/atdb v0.1.3
 	github.com/badoux/checkmail v1.2.1
 	github.com/whatsauth/watoken v0.1.2
 	go.mongodb.org/mongo-driver v1.12.1

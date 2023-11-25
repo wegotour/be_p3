@@ -12,16 +12,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/aiteung/atdb"
 	"github.com/badoux/checkmail"
 	model "github.com/wegotour/be_p3/model"
 )
 
-func MongoConnect(MongoString, dbname string) *mongo.Database {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(os.Getenv(MongoString)))
-	if err != nil {
-		fmt.Printf("MongoConnect: %v\n", err)
+func MongoConnect(MONGOCONNSTRINGENV, dbname string) *mongo.Database {
+	var DBmongoinfo = atdb.DBInfo{
+		// DBString: "mongodb+srv://admin:admin@projectexp.pa7k8.gcp.mongodb.net", //os.Getenv(MONGOCONNSTRINGENV),
+		DBString: os.Getenv(MONGOCONNSTRINGENV),
+		DBName:   dbname,
 	}
-	return client.Database(dbname)
+	return atdb.MongoConnect(DBmongoinfo)
 }
 
 func InsertOneDoc(db *mongo.Database, col string, docs interface{}) (insertedID primitive.ObjectID, err error) {
@@ -254,18 +256,31 @@ func GetUserFromEmail(db *mongo.Database, col string, email string) (user model.
 	return user, nil
 }
 
-func GetAllUser(db *mongo.Database, col string) (userlist []model.User) {
+func GetAllUser(db *mongo.Database, col string) (userlist []model.User, err error) {
+	ctx := context.TODO()
 	cols := db.Collection(col)
 	filter := bson.M{}
-	cursor, err := cols.Find(context.TODO(), filter)
+
+	cur, err := cols.Find(ctx, filter)
 	if err != nil {
-		fmt.Println("Error GetAllDocs in colection", col, ":", err)
+		fmt.Println("Error GetAllUser in colection", col, ":", err)
+		return nil, err
 	}
-	err = cursor.All(context.TODO(), &userlist)
+
+	// defer cur.Close(ctx)
+	defer func() {
+		if cerr := cur.Close(ctx); cerr != nil {
+			fmt.Println("Error closing cursor:", cerr)
+		}
+	}()
+
+	err = cur.All(context.TODO(), &userlist)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error reading documents:", err)
+		return nil, err
 	}
-	return userlist
+
+	return userlist, nil
 }
 
 // ticket
@@ -320,17 +335,31 @@ func UpdateTicket(db *mongo.Database, col string, ticket model.Ticket) (tickets 
 
 	result, err := cols.UpdateOne(context.Background(), filter, update, options)
 	if err != nil {
-		return todos, false, err
+		return tickets, false, err
 	}
 	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
 		err = fmt.Errorf("Data tidak berhasil diupdate")
-		return todos, false, err
+		return tickets, false, err
 	}
 
-	err = cols.FindOne(context.Background(), filter).Decode(&todos)
+	err = cols.FindOne(context.Background(), filter).Decode(&tickets)
 	if err != nil {
-		return todos, false, err
+		return tickets, false, err
 	}
 
-	return todos, true, nil
+	return tickets, true, nil
+}
+
+func DeleteTicket(db *mongo.Database, col string, _id primitive.ObjectID) (status bool, err error) {
+	cols := db.Collection(col)
+	filter := bson.M{"_id": _id}
+	result, err := cols.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return false, err
+	}
+	if result.DeletedCount == 0 {
+		err = fmt.Errorf("Data tidak berhasil dihapus")
+		return false, err
+	}
+	return true, nil
 }

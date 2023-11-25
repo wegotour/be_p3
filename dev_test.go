@@ -119,8 +119,11 @@ func TestGetUserFromEmail(t *testing.T) {
 }
 
 func TestGetAllUser(t *testing.T) {
-	mconn := SetConnection("MONGOSTRING", "wegotour")
-	anu := modul.GetAllUser(mconn, "user")
+	anu, err := modul.GetAllUser(mconn, "user")
+	if err != nil {
+		t.Errorf("Error getting user: %v", err)
+		return
+	}
 	fmt.Println(anu)
 }
 
