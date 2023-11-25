@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -298,4 +299,38 @@ func GetTicketList(db *mongo.Database, col string) (ticketlist model.TicketList)
 		fmt.Println(err)
 	}
 	return ticketlist
+}
+
+func UpdateTicket(db *mongo.Database, col string, ticket model.Ticket) (tickets model.Ticket, status bool, err error) {
+	cols := db.Collection(col)
+	filter := bson.M{"_id": ticket.ID}
+	update := bson.M{
+		"$set": bson.M{
+			"title":               ticket.Title,
+			"description":         ticket.Description,
+			"deadline":            ticket.Deadline,
+			"timestamp.updatedat": time.Now(),
+		},
+		"$setOnInsert": bson.M{
+			"timestamp.createdat": ticket.TimeStamp.CreatedAt,
+		},
+	}
+
+	options := options.Update().SetUpsert(true)
+
+	result, err := cols.UpdateOne(context.Background(), filter, update, options)
+	if err != nil {
+		return todos, false, err
+	}
+	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
+		err = fmt.Errorf("Data tidak berhasil diupdate")
+		return todos, false, err
+	}
+
+	err = cols.FindOne(context.Background(), filter).Decode(&todos)
+	if err != nil {
+		return todos, false, err
+	}
+
+	return todos, true, nil
 }
