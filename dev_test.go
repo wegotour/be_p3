@@ -150,6 +150,10 @@ func TestGetTicketFromID(t *testing.T) {
 }
 
 func TestGetTicketList(t *testing.T) {
-	anu := modul.GetTicketList(mconn, "user")
+	anu, err := modul.GetTicketList(mconn, "ticket")
+	if err != nil {
+		t.Errorf("Error getting ticket: %v", err)
+		return
+	}
 	fmt.Println(anu)
 }

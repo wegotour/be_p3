@@ -302,18 +302,19 @@ func GetTicketFromID(db *mongo.Database, col string, id primitive.ObjectID) (tic
 	return ticket
 }
 
-func GetTicketList(db *mongo.Database, col string) (ticketlist model.TicketList) {
+func GetTicketList(db *mongo.Database, col string) (ticket []model.Ticket, err error) {
 	cols := db.Collection(col)
 	filter := bson.M{}
 	cursor, err := cols.Find(context.Background(), filter)
 	if err != nil {
-		fmt.Println("Error GetAllDocs in colection", col, ":", err)
+		fmt.Println("Error GetTicketList in colection", col, ":", err)
+		return nil, err
 	}
-	err = cursor.All(context.Background(), &ticketlist.Items)
+	err = cursor.All(context.Background(), &ticket)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return ticketlist
+	return ticket, nil
 }
 
 func UpdateTicket(db *mongo.Database, col string, ticket model.Ticket) (tickets model.Ticket, status bool, err error) {
