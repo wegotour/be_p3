@@ -1,10 +1,8 @@
 package be_p3
 
 type User struct {
-	Email    string `bson:"email,omitempty" json:"email,omitempty"`
 	Username string `bson:"username,omitempty" json:"username,omitempty"`
 	Password string `bson:"password,omitempty" json:"password,omitempty"`
-	Role     string `json:"role,omitempty" bson:"role,omitempty"`
 }
 
 type Credential struct {
