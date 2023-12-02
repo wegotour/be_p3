@@ -108,7 +108,7 @@ func LogIn(db *mongo.Database, col string, userdata model.User) (user model.User
 }
 
 func UpdateUser(db *mongo.Database, col string, userdata model.User) (user model.User, status bool, err error) {
-	if userdata.Username == "" || userdata.Email == "" {
+	if userdata.Username == "" {
 		err = fmt.Errorf("data tidak boleh kosong")
 		return user, false, err
 	}
@@ -120,16 +120,16 @@ func UpdateUser(db *mongo.Database, col string, userdata model.User) (user model
 	}
 
 	// Periksa apakah data yang akan diupdate sama dengan data yang sudah ada
-	if userdata.Username == existingUser.Username && userdata.Email == existingUser.Email {
+	if userdata.Username == existingUser.Username {
 		err = fmt.Errorf("data yang ingin diupdate tidak boleh sama")
 		return user, false, err
 	}
 
-	checkmail.ValidateFormat(userdata.Email)
-	if err != nil {
-		err = fmt.Errorf("email tidak valid")
-		return user, false, err
-	}
+	// checkmail.ValidateFormat(userdata.Email)
+	// if err != nil {
+	// 	err = fmt.Errorf("email tidak valid")
+	// 	return user, false, err
+	// }
 
 	// Periksa apakah username memenuhi syarat
 	if strings.Contains(userdata.Username, " ") {
