@@ -39,35 +39,35 @@ func InsertOneDoc(db *mongo.Database, col string, docs interface{}) (insertedID 
 // user
 func Register(db *mongo.Database, col string, userdata model.User) error {
 	if userdata.Username == "" || userdata.Password == "" || userdata.Email == "" {
-		return fmt.Errorf("Data tidak lengkap")
+		return fmt.Errorf("data tidak lengkap")
 	}
 
 	// Periksa apakah email valid
 	if err := checkmail.ValidateFormat(userdata.Email); err != nil {
-		return fmt.Errorf("Email tidak valid")
+		return fmt.Errorf("email tidak valid")
 	}
 
 	// Periksa apakah email dan username sudah terdaftar
 	userExists, _ := GetUserFromEmail(db, col, userdata.Email)
 	if userExists.Email != "" {
-		return fmt.Errorf("Email sudah terdaftar")
+		return fmt.Errorf("email sudah terdaftar")
 	}
 	userExists, _ = GetUserFromUsername(db, col, userdata.Username)
 	if userExists.Username != "" {
-		return fmt.Errorf("Username sudah terdaftar")
+		return fmt.Errorf("username sudah terdaftar")
 	}
 
 	// Periksa apakah password memenuhi syarat
 	if len(userdata.Password) < 6 {
-		return fmt.Errorf("Password minimal 6 karakter")
+		return fmt.Errorf("password minimal 6 karakter")
 	}
 	if strings.Contains(userdata.Password, " ") {
-		return fmt.Errorf("Password tidak boleh mengandung spasi")
+		return fmt.Errorf("password tidak boleh mengandung spasi")
 	}
 
 	// Periksa apakah username memenuhi syarat
 	if strings.Contains(userdata.Username, " ") {
-		return fmt.Errorf("Username tidak boleh mengandung spasi")
+		return fmt.Errorf("username tidak boleh mengandung spasi")
 	}
 
 	// Simpan pengguna ke basis data
@@ -88,20 +88,20 @@ func Register(db *mongo.Database, col string, userdata model.User) error {
 
 func LogIn(db *mongo.Database, col string, userdata model.User) (user model.User, status bool, err error) {
 	if userdata.Username == "" || userdata.Password == "" {
-		err = fmt.Errorf("Data tidak lengkap")
+		err = fmt.Errorf("data tidak lengkap")
 		return user, false, err
 	}
 
 	// Periksa apakah pengguna dengan username tertentu ada
 	userExists, _ := GetUserFromUsername(db, col, userdata.Username)
 	if userExists.Username == "" {
-		err = fmt.Errorf("Username tidak ditemukan")
+		err = fmt.Errorf("username tidak ditemukan")
 		return user, false, err
 	}
 
 	// Periksa apakah kata sandi benar
 	if !CheckPasswordHash(userdata.Password, userExists.Password) {
-		err = fmt.Errorf("Password salah")
+		err = fmt.Errorf("password salah")
 		return user, false, err
 	}
 	return userExists, true, nil
@@ -109,7 +109,7 @@ func LogIn(db *mongo.Database, col string, userdata model.User) (user model.User
 
 func UpdateUser(db *mongo.Database, col string, userdata model.User) (user model.User, status bool, err error) {
 	if userdata.Username == "" || userdata.Email == "" {
-		err = fmt.Errorf("Data tidak boleh kosong")
+		err = fmt.Errorf("data tidak boleh kosong")
 		return user, false, err
 	}
 
@@ -121,19 +121,19 @@ func UpdateUser(db *mongo.Database, col string, userdata model.User) (user model
 
 	// Periksa apakah data yang akan diupdate sama dengan data yang sudah ada
 	if userdata.Username == existingUser.Username && userdata.Email == existingUser.Email {
-		err = fmt.Errorf("Data yang ingin diupdate tidak boleh sama")
+		err = fmt.Errorf("data yang ingin diupdate tidak boleh sama")
 		return user, false, err
 	}
 
 	checkmail.ValidateFormat(userdata.Email)
 	if err != nil {
-		err = fmt.Errorf("Email tidak valid")
+		err = fmt.Errorf("email tidak valid")
 		return user, false, err
 	}
 
 	// Periksa apakah username memenuhi syarat
 	if strings.Contains(userdata.Username, " ") {
-		err = fmt.Errorf("Username tidak boleh mengandung spasi")
+		err = fmt.Errorf("username tidak boleh mengandung spasi")
 		return user, false, err
 	}
 
@@ -154,7 +154,7 @@ func UpdateUser(db *mongo.Database, col string, userdata model.User) (user model
 		return user, false, err
 	}
 	if result.ModifiedCount == 0 {
-		err = fmt.Errorf("Data tidak berhasil diupdate")
+		err = fmt.Errorf("data tidak berhasil diupdate")
 		return user, false, err
 	}
 	return user, true, nil
@@ -169,21 +169,21 @@ func ChangePassword(db *mongo.Database, col string, userdata model.User) (user m
 
 	// Periksa apakah password memenuhi syarat
 	if userdata.Password == "" {
-		err = fmt.Errorf("Password tidak boleh kosong")
+		err = fmt.Errorf("password tidak boleh kosong")
 		return user, false, err
 	}
 	if len(userdata.Password) < 6 {
-		err = fmt.Errorf("Password minimal 6 karakter")
+		err = fmt.Errorf("password minimal 6 karakter")
 		return user, false, err
 	}
 	if strings.Contains(userdata.Password, " ") {
-		err = fmt.Errorf("Password tidak boleh mengandung spasi")
+		err = fmt.Errorf("password tidak boleh mengandung spasi")
 		return user, false, err
 	}
 
 	// Periksa apakah password sama dengan password lama
 	if CheckPasswordHash(userdata.Password, userExists.Password) {
-		err = fmt.Errorf("Password tidak boleh sama")
+		err = fmt.Errorf("password tidak boleh sama")
 		return user, false, err
 	}
 
@@ -193,8 +193,10 @@ func ChangePassword(db *mongo.Database, col string, userdata model.User) (user m
 	filter := bson.M{"username": userdata.Username}
 	update := bson.M{
 		"$set": bson.M{
+			"email":    userdata.Email,
 			"username": userdata.Username,
 			"password": userExists.Password,
+			"role":     "user",
 		},
 	}
 	cols := db.Collection(col)
@@ -217,7 +219,7 @@ func DeleteUser(db *mongo.Database, col string, username string) error {
 		return err
 	}
 	if result.DeletedCount == 0 {
-		return fmt.Errorf("Data tidak berhasil dihapus")
+		return fmt.Errorf("data tidak berhasil dihapus")
 	}
 
 	return nil
@@ -337,7 +339,7 @@ func UpdateTicket(db *mongo.Database, col string, ticket model.Ticket) (tickets 
 		return tickets, false, err
 	}
 	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
-		err = fmt.Errorf("Data tidak berhasil diupdate")
+		err = fmt.Errorf("data tidak berhasil diupdate")
 		return tickets, false, err
 	}
 
@@ -357,7 +359,7 @@ func DeleteTicket(db *mongo.Database, col string, _id primitive.ObjectID) (statu
 		return false, err
 	}
 	if result.DeletedCount == 0 {
-		err = fmt.Errorf("Data tidak berhasil dihapus")
+		err = fmt.Errorf("data tidak berhasil dihapus")
 		return false, err
 	}
 	return true, nil
