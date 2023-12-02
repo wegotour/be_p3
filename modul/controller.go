@@ -193,10 +193,8 @@ func ChangePassword(db *mongo.Database, col string, userdata model.User) (user m
 	filter := bson.M{"username": userdata.Username}
 	update := bson.M{
 		"$set": bson.M{
-			"email":    userdata.Email,
 			"username": userdata.Username,
 			"password": userExists.Password,
-			"role":     "user",
 		},
 	}
 	cols := db.Collection(col)
