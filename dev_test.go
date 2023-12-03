@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var mconn = SetConnection("MONGOSTRING", "wegotour")
+var mconn = modul.MongoConnect("MONGOSTRING", "wegotour")
 
 // user
 func TestRegister(t *testing.T) {
@@ -88,13 +88,15 @@ func TestChangePassword(t *testing.T) {
 
 // test delete user
 func TestDeleteUser(t *testing.T) {
-	username := "dapskuy"
+	var data model.User
+	data.Username = "admin"
 
-	err := modul.DeleteUser(mconn, "user", username)
+	status, err := modul.DeleteUser(mconn, "user", data)
+	fmt.Println("Status", status)
 	if err != nil {
-		t.Errorf("Error deleting user: %v", err)
+		t.Errorf("Error deleting document: %v", err)
 	} else {
-		fmt.Println("Delete user success")
+		fmt.Println("Delete user" + data.Username + "success")
 	}
 }
 
@@ -129,31 +131,80 @@ func TestGetAllUser(t *testing.T) {
 
 // ticket
 func TestInsertTicket(t *testing.T) {
-	mconn := SetConnection("MONGOSTRING", "wegotour")
-	var ticketdata model.Ticket
-	ticketdata.Title = "Perjalanan"
-	ticketdata.Description = "pergi ke bali"
-	ticketdata.IsDone = true
+	var data model.Ticket
+	data.Title = "Pergi ke sana"
+	data.Description = "membeli itu ini"
+	data.Deadline = "02/02/2021"
+	// data.IsDone = false
 
-	nama, err := modul.InsertTicket(mconn, "ticket", ticketdata)
+	uid := "0040f398-1200-4f36-8332-6752ab3e55c0"
+
+	id, err := modul.InsertTicket(mconn, "ticket", data, uid)
 	if err != nil {
 		t.Errorf("Error inserting ticket: %v", err)
 	}
-	fmt.Println(nama)
+	fmt.Println(id)
 }
 
 func TestGetTicketFromID(t *testing.T) {
-	mconn := SetConnection("MONGOSTRING", "wegotour")
-	id, _ := primitive.ObjectIDFromHex("6548bce6c31c8ec3f02fa11d")
-	anu := modul.GetTicketFromID(mconn, "ticket", id)
-	fmt.Println(anu)
-}
-
-func TestGetTicketList(t *testing.T) {
-	anu, err := modul.GetTicketList(mconn, "ticket")
+	id, _ := primitive.ObjectIDFromHex("655c4408d06d3d2ddba5d1d7")
+	anu, err := modul.GetTicketFromID(mconn, "ticket", id)
 	if err != nil {
 		t.Errorf("Error getting ticket: %v", err)
 		return
 	}
 	fmt.Println(anu)
+}
+
+func TestGetTicketFromUsername(t *testing.T) {
+	anu, err := modul.GetTicketFromUsername(mconn, "ticket", "prisya")
+	if err != nil {
+		t.Errorf("Error getting ticket: %v", err)
+		return
+	}
+	fmt.Println(anu)
+}
+
+func TestUpdateTicket(t *testing.T) {
+	var data model.Ticket
+	data.Title = "Belajar Golang"
+	data.Description = "Hari ini belajar golang"
+	data.Deadline = "02/02/2021"
+
+	id := "655c5047370b53741a9705d8"
+	ID, err := primitive.ObjectIDFromHex(id)
+	data.ID = ID
+	if err != nil {
+		fmt.Printf("Data tidak berhasil diubah")
+	} else {
+
+		_, status, err := modul.UpdateTicket(mconn, "ticket", data)
+		fmt.Println("Status", status)
+		if err != nil {
+			t.Errorf("Error updating ticket with id: %v", err)
+			return
+		} else {
+			fmt.Printf("Data berhasil diubah untuk id: %s\n", id)
+		}
+		fmt.Println(data)
+	}
+}
+
+func TestDeleteTicket(t *testing.T) {
+	id := "655c4408d06d3d2ddba5d1d7"
+	ID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Errorf("Error converting id to ObjectID: %v", err)
+		return
+	} else {
+
+		status, err := modul.DeleteTicket(mconn, "ticket", ID)
+		fmt.Println("Status", status)
+		if err != nil {
+			t.Errorf("Error deleting document: %v", err)
+			return
+		} else {
+			fmt.Println("Delete success")
+		}
+	}
 }
