@@ -114,7 +114,7 @@ func UpdateUser(db *mongo.Database, col string, userdata model.User) (user model
 	}
 
 	// Simpan pengguna ke basis data
-	existingUser, err := GetUserFromID(db, col, userdata.ID)
+	existingUser, err := GetUserFromUsername(db, col, userdata.Username)
 	if err != nil {
 		return user, false, err
 	}
@@ -125,11 +125,11 @@ func UpdateUser(db *mongo.Database, col string, userdata model.User) (user model
 		return user, false, err
 	}
 
-	// checkmail.ValidateFormat(userdata.Email)
-	// if err != nil {
-	// 	err = fmt.Errorf("email tidak valid")
-	// 	return user, false, err
-	// }
+	checkmail.ValidateFormat(userdata.Email)
+	if err != nil {
+		err = fmt.Errorf("email tidak valid")
+		return user, false, err
+	}
 
 	// Periksa apakah username memenuhi syarat
 	if strings.Contains(userdata.Username, " ") {
