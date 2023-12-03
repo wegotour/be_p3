@@ -14,26 +14,28 @@ var mconn = modul.MongoConnect("MONGOSTRING", "wegotour")
 // user
 func TestRegister(t *testing.T) {
 	var data model.User
-	data.ID = primitive.NewObjectID()
-	data.Email = "dapskuy@gmail.com"
-	data.Username = "dapskuy"
-	data.Role = "user"
-	data.Password = "kepodah"
+	data.Email = "prisya@gmail.com"
+	data.Username = "prisya"
+	// data.Role = "user"
+	data.Password = "secret"
+	data.ConfirmPassword = "secret"
 
 	err := modul.Register(mconn, "user", data)
 	if err != nil {
 		t.Errorf("Error registering user: %v", err)
 	} else {
-		fmt.Println("Register success", data)
+		fmt.Println("Register success", data.Username)
 	}
 }
 
 // test login
 func TestLogIn(t *testing.T) {
-	var userdata model.User
-	userdata.Username = "dapskuy"
-	userdata.Password = "kepodah"
-	user, status, err := modul.LogIn(mconn, "user", userdata)
+	var data model.User
+	data.Username = "prisya"
+	data.Password = "secret"
+	data.Role = "user"
+
+	user, status, err := modul.LogIn(mconn, "user", data)
 	fmt.Println("Status", status)
 	if err != nil {
 		t.Errorf("Error logging in user: %v", err)
@@ -44,14 +46,12 @@ func TestLogIn(t *testing.T) {
 
 func TestUpdateUser(t *testing.T) {
 	var data model.User
-	data.Email = "dapskuy@gmail.com"
-	data.Username = "dapskuy"
-	data.Role = "admin"
+	data.Email = "prisyahaura@gmail.com"
+	data.Username = "prisya"
 
-	data.Password = "kepodah" // password tidak diubah
-
-	id, err := primitive.ObjectIDFromHex("654a6513226d8ad245cd01ff")
-	data.ID = id
+	id := "656c3f638442be4a7c185a09"
+	ID, err := primitive.ObjectIDFromHex(id)
+	data.ID = ID
 	if err != nil {
 		fmt.Printf("Data tidak berhasil diubah")
 	} else {
@@ -69,27 +69,25 @@ func TestUpdateUser(t *testing.T) {
 // test change password
 func TestChangePassword(t *testing.T) {
 	var data model.User
-	data.Email = "dapskuy@gmail.com" // email tidak diubah
-	data.Username = "dapskuy"        // username tidak diubah
-	data.Role = "admin"              // role tidak diubah
+	data.Password = "secrets"
+	data.ConfirmPassword = "secrets"
 
-	data.Password = "kepodah"
-
-	// username := "dapskut123"
+	username := "prisya"
+	data.Username = username
 
 	_, status, err := modul.ChangePassword(mconn, "user", data)
 	fmt.Println("Status", status)
 	if err != nil {
 		t.Errorf("Error updateting document: %v", err)
 	} else {
-		fmt.Println("Password berhasil diubah dengan username:", data.Username)
+		fmt.Println("Password berhasil diubah dengan username:", username)
 	}
 }
 
 // test delete user
 func TestDeleteUser(t *testing.T) {
 	var data model.User
-	data.Username = "admin"
+	data.Username = "prisya"
 
 	status, err := modul.DeleteUser(mconn, "user", data)
 	fmt.Println("Status", status)
@@ -101,13 +99,23 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestGetUserFromID(t *testing.T) {
-	id, _ := primitive.ObjectIDFromHex("6539d6c46700af5da789a678")
-	anu, _ := modul.GetUserFromID(mconn, "user", id)
+	id := "656bf30c733cf24a0f73d0a8"
+	ID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Errorf("Error converting id to ObjectID: %v", err)
+		return
+	}
+
+	anu, err := modul.GetUserFromID(mconn, "user", ID)
+	if err != nil {
+		t.Errorf("Error getting user: %v", err)
+		return
+	}
 	fmt.Println(anu)
 }
 
 func TestGetUserFromUsername(t *testing.T) {
-	anu, err := modul.GetUserFromUsername(mconn, "user", "dapskuy")
+	anu, err := modul.GetUserFromUsername(mconn, "user", "prisya")
 	if err != nil {
 		t.Errorf("Error getting user: %v", err)
 		return
@@ -116,7 +124,7 @@ func TestGetUserFromUsername(t *testing.T) {
 }
 
 func TestGetUserFromEmail(t *testing.T) {
-	anu, _ := modul.GetUserFromEmail(mconn, "user", "tejo@gmail.com")
+	anu, _ := modul.GetUserFromEmail(mconn, "user", "prisya@gmail.com")
 	fmt.Println(anu)
 }
 
@@ -132,9 +140,9 @@ func TestGetAllUser(t *testing.T) {
 // ticket
 func TestInsertTicket(t *testing.T) {
 	var data model.Ticket
-	data.Title = "Pergi ke sana"
-	data.Description = "membeli itu ini"
-	data.Deadline = "02/02/2021"
+	data.Title = "Artapela"
+	data.Description = "mendaki gunung"
+	data.Deadline = "12/04/2023"
 	// data.IsDone = false
 
 	uid := "0040f398-1200-4f36-8332-6752ab3e55c0"

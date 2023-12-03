@@ -30,17 +30,13 @@ type Ticket struct {
 	Deadline    string             `bson:"deadline,omitempty" json:"deadline,omitempty"`
 	TimeStamp   TimeStamp          `bson:"timestamp,omitempty" json:"timestamp,omitempty"`
 	IsDone      bool               `bson:"isdone,omitempty" json:"isdone,omitempty"`
+	User        User               `bson:"user,omitempty" json:"user,omitempty"`
 }
 
 type TimeStamp struct {
 	CreatedAt time.Time `bson:"createdat,omitempty" json:"createdat,omitempty"`
 	UpdatedAt time.Time `bson:"updatedat,omitempty" json:"updatedat,omitempty"`
 }
-
-// type TicketList struct {
-// 	Users      []User   `bson:"users,omitempty" json:"users,omitempty"`
-// 	DataTicket []Ticket `bson:"ticketlist,omitempty" json:"ticketlist,omitempty"`
-// }
 
 type TicketResponse struct {
 	Status  bool     `bson:"status" json:"status"`
